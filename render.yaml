@@ -4,7 +4,7 @@ services:
     name: n8n-main
     env: docker
     repo: https://github.com/render-examples/n8n # Or your own forked repository
-    plan: standard # External mode/Task runners require paid plans for resource allocation
+    plan: free # External mode/Task runners require paid plans for resource allocation
     region: oregon # Use the same region for both services to minimize latency
     numInstances: 1
     healthCheckPath: /healthz
