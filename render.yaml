@@ -1,94 +1,55 @@
-# Use this Blueprint to deploy n8n on Render as a web
-# service that uses a Postgres database to store
-# workflow data.
-#
-# This Blueprint uses free instance types (specified by
-# `plan`) for both the web service and the database. You
-# can upgrade to paid instance types at any time to
-# increase resources.
-
 services:
-  n8n:
-      image: n8nio/n8n:1.111.0
-      container_name: n8n-main
-      environment:
-        - key: N8N_RUNNERS_ENABLED
-          value: true
-        - key: N8N_RUNNERS_MODE
-          value: external
-        - key: N8N_RUNNERS_BROKER_LISTEN_ADDRESS
-          value: 0.0.0.0
-        - key: N8N_RUNNERS_AUTH_TOKEN
-          value: 3a8f9c1e7b2d5a0f4e6c8b1d9a3f5e7c2b4d6a8f1e3c5b7d9a0f2e4c6b8a1d3f
-        - key: N8N_NATIVE_PYTHON_RUNNER
-          value: true
-      ports:
-        - "5678:5678"
-      volumes:
-        - n8n_data:/home/node/.n8n
-      # etc.
-  
-    task-runners:
-      image: n8nio/runners:1.111.0
-      container_name: n8n-runners
-      environment:
-        - N8N_RUNNERS_TASK_BROKER_URI=http://n8n-main:5679
-        - N8N_RUNNERS_AUTH_TOKEN=your-secret-here
-        # etc.
-      depends_on:
-        - n8n
+  # 1. Main n8n Instance (Web Service)
   - type: web
-    plan: free
-    # This is the runtime for services that pull a prebuilt Docker image
-    runtime: image
-    # You can give the service any name
-    name: n8n-service
-    image:
-      # Pulls the n8n image tagged as latest from Docker Hub
-      url: docker.io/n8nio/n8n:latest
-
-    # All environment variables defined below are required!
-    #
-    # You can define additional environment variables as needed.
+    name: n8n-main
+    env: docker
+    repo: https://github.com/render-examples/n8n # Or your own forked repository
+    plan: standard # External mode/Task runners require paid plans for resource allocation
+    region: oregon # Use the same region for both services to minimize latency
+    numInstances: 1
+    healthCheckPath: /healthz
     envVars:
-      # Generates a base64-encoded key for
-      # encrypting credentials in n8n
-      #
-      # Do not modify this value after it's generated!
-      # If you do, you'll lose access to all credentials
-      # encrypted with the previous value.
       - key: N8N_ENCRYPTION_KEY
-        generateValue: true
-
-      # These automatically populate connection details 
-      # for the Render Postgres database defined below
+        generateValue: true # Securely generates and persists encryption key on Render
+      - key: WEBHOOK_URL
+        sync: false # Set this to your live Render URL manually after first deploy
+      - key: N8N_RUNNERS_ENABLED
+        value: "true" # Enforces external task runner mode
+      - key: N8N_RUNNERS_MODE
+        value: "external"
+      - key: N8N_RUNNERS_MAIN_URL
+        value: "http://localhost:5678" # Internal address for runner coordination
+      - key: N8N_RUNNERS_AUTH_TOKEN
+        generateValue: true # Generates a secure shared token to authenticate the runner
+      
+      # Database Configuration (Connect your external PostgreSQL)
       - key: DB_TYPE
         value: postgresdb
-      - key: DB_POSTGRESDB_DATABASE
-        fromDatabase:
-          name: n8n-db
-          property: database
       - key: DB_POSTGRESDB_HOST
-        fromDatabase:
-          name: n8n-db
-          property: host
-      - key: DB_POSTGRESDB_PASSWORD
-        fromDatabase:
-          name: n8n-db
-          property: password
+        value: your-external-db-host.com
+      - key: DB_POSTGRESDB_PORT
+        value: "5432"
+      - key: DB_POSTGRESDB_DATABASE
+        value: n8n_database
       - key: DB_POSTGRESDB_USER
-        fromDatabase:
-          name: n8n-db
-          property: user
+        value: n8n_user
+      - key: DB_POSTGRESDB_PASSWORD
+        sync: false # Prompt user to fill manually via Render UI
 
-databases:
-  - name: n8n-db
-    plan: free
-    # The free instance type is limited to 1 GB of disk
-    # space.
-    #
-    # If you later upgrade to a paid instance type, you can
-    # increase the disk size to any multiple of 5 GB by
-    # setting the `diskSizeGB` property.
-    #
-    # diskSizeGB: 5
+  # 2. n8n Task Runner (Background Worker Service)
+  - type: worker
+    name: n8n-task-runner
+    env: docker
+    dockerfilePath: ./Dockerfile.runner # Requires a Dockerfile pulling n8nio/runners
+    plan: standard
+    region: oregon # Must match n8n-main region
+    numInstances: 1
+    envVars:
+      - key: N8N_RUNNERS_MAIN_URL
+        fromService:
+          name: n8n-main
+          property: host # Uses Render's private networking to safely reach the main instance
+      - key: N8N_RUNNERS_AUTH_TOKEN
+        fromService:
+          name: n8n-main
+          property: envVar:N8N_RUNNERS_AUTH_TOKEN # Pulls the generated token from the main service
