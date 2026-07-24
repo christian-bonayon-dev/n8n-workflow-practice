@@ -10,17 +10,17 @@ services:
     healthCheckPath: /healthz
     envVars:
       - key: N8N_ENCRYPTION_KEY
-        generateValue: aa2ca37bfd5d8f39004868519650b7eb99cb46f9458b812633d0648a88f7d36c # Securely generates and persists encryption key on Render
+        generateValue: true # Securely generates and persists encryption key on Render
       - key: WEBHOOK_URL
         sync: n8n-workflow-practice.onrender.com # Set this to your live Render URL manually after first deploy
       - key: N8N_RUNNERS_ENABLED
-        value: "true" # Enforces external task runner mode
+        value: true # Enforces external task runner mode
       - key: N8N_RUNNERS_MODE
-        value: "external"
+        value: external
       - key: N8N_RUNNERS_MAIN_URL
         value: "http://localhost:5678" # Internal address for runner coordination
       - key: N8N_RUNNERS_AUTH_TOKEN
-        generateValue: 3a8f9c1e7b2d5a0f4e6c8b1d9a3f5e7c2b4d6a8f1e3c5b7d9a0f2e4c6b8a1d3f # Generates a secure shared token to authenticate the runner
+        generateValue: true # Generates a secure shared token to authenticate the runner
       
       # Database Configuration (Connect your external PostgreSQL)
       - key: DB_TYPE
