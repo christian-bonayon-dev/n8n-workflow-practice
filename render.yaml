@@ -12,7 +12,7 @@ services:
       - key: N8N_ENCRYPTION_KEY
         generateValue: true # Securely generates and persists encryption key on Render
       - key: WEBHOOK_URL
-        sync: n8n-workflow-practice.onrender.com # Set this to your live Render URL manually after first deploy
+        sync: "n8n-workflow-practice.onrender.com" # Set this to your live Render URL manually after first deploy
       - key: N8N_RUNNERS_ENABLED
         value: true # Enforces external task runner mode
       - key: N8N_RUNNERS_MODE
@@ -34,7 +34,7 @@ services:
       - key: DB_POSTGRESDB_USER
         value: postgres.odtccfmczkyctwbsniqy
       - key: DB_POSTGRESDB_PASSWORD
-        sync: admin@123Root # Prompt user to fill manually via Render UI
+        sync: "admin@123Root" # Prompt user to fill manually via Render UI
 
   # 2. n8n Task Runner (Background Worker Service)
   - type: worker
