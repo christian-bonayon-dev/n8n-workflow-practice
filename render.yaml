@@ -34,7 +34,7 @@ services:
       - key: DB_POSTGRESDB_USER
         value: postgres.odtccfmczkyctwbsniqy
       - key: DB_POSTGRESDB_PASSWORD
-        sync: "admin@123Root" # Prompt user to fill manually via Render UI
+        sync: false # Prompt user to fill manually via Render UI
 
   # 2. n8n Task Runner (Background Worker Service)
   - type: worker
