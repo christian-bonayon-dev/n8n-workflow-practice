@@ -10,9 +10,9 @@ services:
     healthCheckPath: /healthz
     envVars:
       - key: N8N_ENCRYPTION_KEY
-        generateValue: true # Securely generates and persists encryption key on Render
+        generateValue: aa2ca37bfd5d8f39004868519650b7eb99cb46f9458b812633d0648a88f7d36c # Securely generates and persists encryption key on Render
       - key: WEBHOOK_URL
-        sync: false # Set this to your live Render URL manually after first deploy
+        sync: n8n-workflow-practice.onrender.com # Set this to your live Render URL manually after first deploy
       - key: N8N_RUNNERS_ENABLED
         value: "true" # Enforces external task runner mode
       - key: N8N_RUNNERS_MODE
@@ -20,21 +20,21 @@ services:
       - key: N8N_RUNNERS_MAIN_URL
         value: "http://localhost:5678" # Internal address for runner coordination
       - key: N8N_RUNNERS_AUTH_TOKEN
-        generateValue: true # Generates a secure shared token to authenticate the runner
+        generateValue: 3a8f9c1e7b2d5a0f4e6c8b1d9a3f5e7c2b4d6a8f1e3c5b7d9a0f2e4c6b8a1d3f # Generates a secure shared token to authenticate the runner
       
       # Database Configuration (Connect your external PostgreSQL)
       - key: DB_TYPE
         value: postgresdb
       - key: DB_POSTGRESDB_HOST
-        value: your-external-db-host.com
+        value: aws-0-ap-southeast-1.pooler.supabase.com
       - key: DB_POSTGRESDB_PORT
-        value: "5432"
+        value: 6543
       - key: DB_POSTGRESDB_DATABASE
         value: n8n_database
       - key: DB_POSTGRESDB_USER
-        value: n8n_user
+        value: postgres.odtccfmczkyctwbsniqy
       - key: DB_POSTGRESDB_PASSWORD
-        sync: false # Prompt user to fill manually via Render UI
+        sync: admin@123Root # Prompt user to fill manually via Render UI
 
   # 2. n8n Task Runner (Background Worker Service)
   - type: worker
