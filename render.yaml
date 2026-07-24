@@ -12,7 +12,7 @@ services:
       - key: N8N_ENCRYPTION_KEY
         generateValue: true # Securely generates and persists encryption key on Render
       - key: WEBHOOK_URL
-        sync: "true" # Set this to your live Render URL manually after first deploy
+        sync: true # Set this to your live Render URL manually after first deploy
       - key: N8N_RUNNERS_ENABLED
         value: true # Enforces external task runner mode
       - key: N8N_RUNNERS_MODE
